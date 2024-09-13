@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Filmes;
+use App\Models\Filme;
 use Illuminate\Http\Request;
 
 class FilmesController extends Controller
 {
-    public function index() {
-        $dados = Filmes::all();
-        
+    public function index () {
+        $filmes = Filme::all();
+
         return view('filmes.index', [
-            'filmes' => $dados,
+            'filmes' => $filmes
+        ]);
+    }
+
+    public function show ($id) {
+        $filme = Filme::find($id);
+        return view('filmes.show', [
+            'filme' => $filme,
         ]);
     }
 
@@ -20,29 +27,32 @@ class FilmesController extends Controller
     }
 
     public function gravar(Request $form) {
-        dd($form);
-        $dados = $form->validate([
-            'nome' => 'required|string|max:255',
-            'sinopse' => 'required|string|max:255',
-            'ano' => 'required|string|max:255',
-            'categoria' => 'required|string|max:255',
-            'imagem_da_capa' => 'nullable|string|max:255',
-            'link' => 'required|string|max:255',
-        ]);
 
-        Filmes::create($dados);
+        $dados = $form->validate([
+            'nome' => 'required|min:3',
+            'sinopse' => 'required',
+            'ano' => 'required|integer',
+            'categoria' => 'required',
+            'capa' => 'required',
+            'trailer' => 'required'
+        ]);
+        $path = $form->file('capa')->store('filmes', 'imagens');
+
+        $dados['capa'] = $path;
+        
+        Filme::create($dados);
         
         return redirect()->route('filmes');
     }
 
-    public function apagar(Filmes $filmes) {
+    public function apagar(Filme $filme) {
         return view('filmes.apagar', [
-            'filmes' => $filmes,
+            'filme' => $filme,
         ]);
     }
 
-    public function deletar(Filmes $filmes) {
-        $filmes->delete();
+    public function deletar(Filme $filme) {
+        $filme->delete();
         return redirect()->route('filmes');
     }
 }

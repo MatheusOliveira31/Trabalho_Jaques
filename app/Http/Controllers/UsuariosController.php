@@ -2,46 +2,64 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Usuarios;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UsuariosController extends Controller
 {
-    public function index() {
-        $dados = Usuarios::all();
-        
-        return view('usuarios.index', [
-            'usuarios' => $dados,
-        ]);
+    public function index()
+    {
+        $usuarios = Usuario::orderBy('name', 'asc')->get();
+
+        return view('usuarios.index', ['usuarios' => $usuarios, 'pagina' => 'usuarios']);
     }
 
-    public function cadastrar() {
+    public function create()
+    {
         return view('usuarios.cadastrar');
     }
 
-    public function gravar(Request $form) {
-        dd($form);
+    public function insert(Request $form)
+    {
         $dados = $form->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:usuarios',
-            'nome_usuario' => 'required|string|max:255|unique:usuarios',
-            'senha' => 'required|string|min:8',
+            'name' => 'required',
+            'email' => 'email|required|unique:usuarios',
+            'username' => 'required|min:3',
+            'password' => 'required|min:3',
             'admin' => 'boolean',
         ]);
 
-        Usuarios::create($dados);
-        
+        $dados['password'] = Hash::make($dados['password']);
+
+        Usuario::create($dados);
+
         return redirect()->route('usuarios');
     }
 
-    public function apagar(Usuarios $usuarios) {
-        return view('usuarios.apagar', [
-            'usuarios' => $usuarios,
-        ]);
+    public function login(Request $form) {
+        if ($form->isMethod('POST')) {
+
+            // Pega os dados do formulário
+            $credenciais = $form->validate([
+                'username' => 'required',
+                'password' => 'required',
+            ]);
+
+            // Tenta fazer o login
+            if (Auth::attempt($credenciais)) {
+                return redirect()->intended(route('index'));
+            } else {
+                return redirect()->route('login')->with('erro', 'Usuário ou senha inválidos');
+            }
+        }
+
+        return view('usuarios.login');
     }
 
-    public function deletar(Usuarios $usuarios) {
-        $usuarios->delete();
-        return redirect()->route('usuarios');
+    public function logout() {
+        Auth::logout();
+        return redirect()->route('index');
     }
 }
