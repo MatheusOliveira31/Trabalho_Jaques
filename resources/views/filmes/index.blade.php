@@ -18,7 +18,7 @@
             @foreach ($filmes as $filme)
                     <div class="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
                         <a href={{route ('filmes.mostrar', ['id' => $filme['id']])}}>
-                            <img src="img/{{ $filme['capa'] }}" alt="{{ $filme['nome'] }}" class="w-full h-48 object-cover">
+                            <img src="{{ asset('img/' . $filme['capa']) }}" alt="{{ $filme['nome'] }}" class="w-full h-48 object-cover">
                             <div class="p-4">
                                 <h2 class="text-xl font-bold mb-2">{{ $filme['nome'] }}</h2>
                                 <p class="text-gray-600 mb-2"><strong>Ano:</strong> {{ $filme['ano'] }}</p>

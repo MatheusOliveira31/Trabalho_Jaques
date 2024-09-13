@@ -41,13 +41,11 @@ class UsuariosController extends Controller
     public function login(Request $form) {
         if ($form->isMethod('POST')) {
 
-            // Pega os dados do formulário
             $credenciais = $form->validate([
                 'username' => 'required',
                 'password' => 'required',
             ]);
 
-            // Tenta fazer o login
             if (Auth::attempt($credenciais)) {
                 return redirect()->intended(route('index'));
             } else {
